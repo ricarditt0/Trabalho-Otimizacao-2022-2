@@ -1,5 +1,5 @@
 using JuMP
-using GLPK
+using Cbc
 
 function problema_2(nt,C,c,s,t)
     # nt =  numero de tasks
@@ -10,9 +10,9 @@ function problema_2(nt,C,c,s,t)
     # nm = numero de maquinas total
     nm = nt
     t_max = maximum(t)
-    model = Model(GLPK.Optimizer)
-    #set_time_limit_sec(model, 60*25)
-    set_optimizer_attribute(model, "msg_lev", GLPK.GLP_MSG_ALL)
+    model = Model(Cbc.Optimizer)
+    set_optimizer_attribute(model, "seconds", 60.0*60*2)
+    set_optimizer_attribute(model, "logLevel", 1)
     @variable(model, x1[0:nm-1], Bin)
     @variable(model, x2[0:nm-1], Bin)
     @variable(model, z[0:nm-1])
@@ -29,13 +29,12 @@ function problema_2(nt,C,c,s,t)
     @constraint(model, [i in 0:nm-1], x1[i] + x2[i] == 1)
 
     #restrição de numero de cores usados por unidade de tempo
-    @constraint(model, [k in 0:t_max, i in 0:nm-1], sum(c[j+1]*y[i,j]*(s[j+1] <= k <= t[j+1] ? 1 : 0) for j in 0:nt-1) <= C)
+    @constraint(model, [i in 0:nm-1, k in 0:t_max], sum(c[j+1]*y[i,j]*(s[j+1] <= k <= t[j+1] ? 1 : 0) for j in 0:nt-1) <= C)
 
     #numero de cores utilizados por uma tarefa deve ser menor que C
     @constraint(model, [i in 1:nt], c[i] <= C)
     optimize!(model)
-    solution_summary(model, verbose=true)
-    @show value.(z) objective_value(model)
+    @show value.(x2) objective_value(model)
 end
 
 
@@ -46,7 +45,7 @@ function main()
     s = []
     t = []
 
-    f = open("instancia_200_100_2.dat", "r")
+    f = open("instancia_200_100_1.dat", "r")
     line = readline(f)
     temp = split(line,"\t")
     n = parse(Int64,temp[1])
