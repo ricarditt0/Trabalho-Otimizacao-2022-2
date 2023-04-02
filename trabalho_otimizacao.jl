@@ -11,7 +11,7 @@ function problema_2(nt,C,c,s,t)
     nm = nt
     t_max = maximum(t)
     model = Model(Cbc.Optimizer)
-    set_optimizer_attribute(model, "seconds", 60.0*60*2)
+    set_optimizer_attribute(model, "seconds", 60.0*60)
     set_optimizer_attribute(model, "logLevel", 1)
     @variable(model, x1[0:nm-1], Bin)
     @variable(model, x2[0:nm-1], Bin)
@@ -34,7 +34,7 @@ function problema_2(nt,C,c,s,t)
     #numero de cores utilizados por uma tarefa deve ser menor que C
     @constraint(model, [i in 1:nt], c[i] <= C)
     optimize!(model)
-    @show value.(x2) objective_value(model)
+    @show objective_value(model)
 end
 
 
