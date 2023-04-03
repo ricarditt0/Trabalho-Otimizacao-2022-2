@@ -1,0 +1,1 @@
+O trabalho esta em um notebook jupyter que foi feito no google colab pode ser executado no google drive ou como um notebook jupyter normal
